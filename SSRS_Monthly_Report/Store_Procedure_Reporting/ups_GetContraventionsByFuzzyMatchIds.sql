@@ -1,4 +1,4 @@
-CREATE PROCEDURE GetContraventionsByVerifiedMatchIds
+CREATE PROCEDURE Reporting.upc_GetContraventionsByFuzzyMatchIds
 AS
 BEGIN
     SET NOCOUNT ON;
