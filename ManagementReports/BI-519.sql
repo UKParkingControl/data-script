@@ -1,7 +1,18 @@
-WITH SentLetters AS (
+WITH ContraventionTypes AS (
+---- to filter contravention created since 2024
+    SELECT 
+        a.Id AS AccountId,
+    
+        LEFT(C.Reference,1)  ContraventionType 
+    FROM [StellaProduction].[sqldb-stella-prod].cm.Accounts a
+    JOIN [StellaProduction].[sqldb-stella-prod].cm.Contraventions c 
+    
+        ON a.Id = c.ActiveAccountId and c.Created >= '2024-01-01')
+,SentLetters AS (
+---to obtain all the letter that sent to Account (Initial Notice, Final Reminder, IDR )
     SELECT 
         ac.AccountId,   
-        ac.Created,
+        ac.Created, ct.ContraventionType,
         CASE 
             WHEN wlt.LetterType = 0 THEN 0
             WHEN wlt.LetterType IN (1, 7) THEN 1
@@ -11,23 +22,23 @@ WITH SentLetters AS (
     INNER JOIN [StellaProduction].[sqldb-stella-prod].cm.WorkflowLetterTemplates wlt  
         ON ac.WorkflowLetterTemplateId = wlt.Id  
         AND wlt.LetterType IN (0, 1, 7, 6, 8)
-    WHERE 
-        ac.Created >= '2024-01-01'
-        AND ac.SendStatus = 3
+    INNER JOIN ContraventionTypes ct on ac.AccountId = ct.AccountId
+    WHERE   ac.SendStatus = 3
 ),
 LatestLetterDates AS (
+---to pivot the table by account, with one row per account.
     SELECT
-        AccountId,
-        CAST(MAX(CASE WHEN LetterType = 0 THEN Created END) AS DATE) AS ini_date,
-        CAST(MAX(CASE WHEN LetterType = 1 THEN Created END) AS DATE) AS fin_date,
-        CAST(MAX(CASE WHEN LetterType = 2 THEN Created END) AS DATE) AS idr_date,
+        AccountId, ContraventionType,
+        CAST(MAX(CASE WHEN LetterType = 0 THEN Created END) AS DATE) AS ini_date, --the latest date a initial letter is sent
+        CAST(MAX(CASE WHEN LetterType = 1 THEN Created END) AS DATE) AS fin_date, --the latest date a final letter is sent
+        CAST(MAX(CASE WHEN LetterType = 2 THEN Created END) AS DATE) AS idr_date, --the latest date a idr letter is sent
         CAST(MAX(Created) AS DATE) AS last_letter
     FROM SentLetters
-    GROUP BY AccountId
-),
-AccountPaymentSummary AS (
+    GROUP BY AccountId,ContraventionType
+) 
+--- to join with payment table to calculate Payment Ammount
     SELECT 
-        lld.AccountId, 
+        lld.AccountId,  lld.ContraventionType,
         lld.ini_date,  
         lld.fin_date,  
         lld.idr_date,  
@@ -39,7 +50,7 @@ AccountPaymentSummary AS (
         END AS last_letter_type,
         pi.paid_date, 
         pi.Amount,
-        DATEDIFF(DAY, lld.last_letter, pi.paid_date) AS DaysToPayment,
+        DATEDIFF(DAY, lld.fin_date, pi.paid_date) AS DaysToPayment,
         pi.is_debt_recovery
     FROM LatestLetterDates lld
     LEFT JOIN (  
@@ -51,6 +62,7 @@ AccountPaymentSummary AS (
                 ELSE 0 
             END) AS Amount,
             CAST(MAX(at2.Created) AS DATE) AS paid_date,
+            ---to check if the payment is debt recovery
             CASE 
                 WHEN SUM(CASE WHEN at2.TransactionType = 10 THEN 1 ELSE 0 END) > 0 
                 THEN 1 
@@ -64,18 +76,4 @@ AccountPaymentSummary AS (
         GROUP BY at2.AccountId
     ) pi ON lld.AccountId = pi.AccountId
     WHERE (lld.ini_date IS NOT NULL OR lld.fin_date IS NOT NULL)
-),
-ContraventionTypes AS (
-    SELECT 
-        a.Id AS AccountId,
-        c.Type AS ContraventionType
-    FROM [StellaProduction].[sqldb-stella-prod].cm.Accounts a
-    JOIN [StellaProduction].[sqldb-stella-prod].cm.Contraventions c 
-        ON a.ContraventionId = c.Id
-)
-
-SELECT 
-    aps.*,   
-    ct.ContraventionType
-FROM AccountPaymentSummary aps
-LEFT JOIN ContraventionTypes ct ON aps.AccountId = ct.AccountId ;
+ 
