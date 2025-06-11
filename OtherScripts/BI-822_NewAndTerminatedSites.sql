@@ -240,8 +240,27 @@ SET DATEFIRST 1;
 			'New' [Type],
 			S.ZoneExternalReference,
 			S.ZoneName,
-			NULL [ServiceLiveDate],
-			NULL [ServiceTermDate]			
+	    CASE
+        WHEN Z.STSLiveDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.STSLiveDate <= DDate AND Z.STS = 1 THEN Z.STSLiveDate
+        WHEN Z.ITICKETLiveDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.ITICKETLiveDate <= DDate AND Z.ITICKET = 1 THEN Z.ITICKETLiveDate
+        WHEN Z.ITICKETLITELiveDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.ITICKETLITELiveDate <= DDate AND Z.ITICKETLITE = 1 THEN Z.ITICKETLITELiveDate
+        WHEN Z.STSNewLiveDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.STSNewLiveDate <= DDate AND Z.STSNEW = 1 THEN Z.STSNewLiveDate
+        ELSE NULL
+    END AS ServiceLiveDate,
+    CASE
+        WHEN Z.STSLiveDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.STSLiveDate <= DDate AND Z.STS = 1 THEN Z.STSTermDate
+        WHEN Z.ITICKETLiveDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.ITICKETLiveDate <= DDate AND Z.ITICKET = 1 THEN Z.ITICKETTermDate
+        WHEN Z.ITICKETLITELiveDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.ITICKETLITELiveDate <= DDate AND Z.ITICKETLITE = 1 THEN Z.ITICKETLITETermDate
+        WHEN Z.STSNewLiveDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.STSNewLiveDate <= DDate AND Z.STSNEW = 1 THEN Z.STSNEWTermDate
+        ELSE NULL	END AS ServiceTermDate		
 		FROM 
 			cte_Dates D
 		LEFT JOIN
@@ -309,9 +328,29 @@ SET DATEFIRST 1;
 			'Termination' [Type],
 			S.ZoneExternalReference,
 			S.ZoneName,
-			NULL [ServiceLiveDate],
-			NULL [ServiceTermDate]			
-		FROM 
+ CASE
+        WHEN Z.STSTermDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.STSTermDate <= DDate AND Z.STS = 1 THEN Z.STSLiveDate
+        WHEN Z.ITICKETTermDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.ITICKETTermDate <= DDate AND Z.ITICKET = 1 THEN Z.ITICKETLiveDate
+        WHEN Z.ITICKETLITETermDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.ITICKETLITETermDate <= DDate AND Z.ITICKETLITE = 1 THEN Z.ITICKETLITELiveDate
+        WHEN Z.STSNEWTermDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.STSNEWTermDate <= DDate AND Z.STSNEW = 1 THEN Z.STSNewLiveDate
+        ELSE NULL
+    END AS ServiceLiveDate,
+ CASE
+        WHEN Z.STSTermDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.STSTermDate <= DDate AND Z.STS = 1 THEN Z.STSTermDate
+        WHEN Z.ITICKETTermDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.ITICKETTermDate <= DDate AND Z.ITICKET = 1 THEN Z.ITICKETTermDate
+        WHEN Z.ITICKETLITETermDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.ITICKETLITETermDate <= DDate AND Z.ITICKETLITE = 1 THEN Z.ITICKETLITETermDate
+        WHEN Z.STSNEWTermDate >= DATEFROMPARTS(YEAR(DDate), MONTH(DDate), 1)
+             AND Z.STSNEWTermDate <= DDate AND Z.STSNEW = 1 THEN Z.STSNEWTermDate
+        ELSE NULL
+    END AS ServiceTermDate
+    FROM 
 			cte_Dates D
 		LEFT JOIN
 			[BusinessIntelligence].[Statistics].[Sites_ZoneActiveServices] Z ON 
@@ -386,10 +425,10 @@ SET DATEFIRST 1;
 		SELECT * FROM cte_ECAM_NewZonesInMonth
 		UNION ALL
 		SELECT * FROM cte_ECAM_LostZonesInMonth
-	--	UNION ALL
-	--	SELECT * FROM cte_Other_NewZonesInMonth
-	--	UNION ALL
-	--	SELECT * FROM cte_Other_LostZonesInMonth
+		UNION ALL
+		SELECT * FROM cte_Other_NewZonesInMonth
+		UNION ALL
+		SELECT * FROM cte_Other_LostZonesInMonth
 	)
 
 

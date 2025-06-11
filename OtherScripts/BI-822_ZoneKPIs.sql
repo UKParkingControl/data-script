@@ -113,7 +113,8 @@
 		FROM 
 			cte_Dates D
 		LEFT JOIN
-			[BusinessIntelligence].[Statistics].[Sites_ZoneActiveServices] Z ON Z.ANPRLiveDate >= DATEFROMPARTS(YEAR(DDate), MONTH(dDate), 1) AND Z.ANPRLiveDate <= Ddate AND Z.ANPR=1
+			[BusinessIntelligence].[Statistics].[Sites_ZoneActiveServices] Z 
+			ON Z.ANPRLiveDate >= DATEFROMPARTS(YEAR(DDate), MONTH(dDate), 1) AND Z.ANPRLiveDate <= Ddate AND Z.ANPR=1
 		JOIN
 			[BusinessIntelligence].[Statistics].[Sites] S ON S.ZoneID = Z.ZoneID AND S.[System] = 'Stella'
 		OUTER APPLY
