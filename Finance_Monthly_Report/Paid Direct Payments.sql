@@ -178,7 +178,7 @@ GO
 		) AS a
 	WHERE 
 		PaidDirectPayment > 0 -- Make sure this is paid direct
-		and PaidAt >= '2025-05-07'
+		--and PaidAt >= '2025-05-07'
 
 	ORDER BY 
 		PaidAt DESC
