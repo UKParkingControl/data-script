@@ -12,7 +12,7 @@ JOIN VehicleList.dbo.WhiteLists wl on wl.VrnNumber = c.VRN AND wl.ID=s.WhiteList
 WHERE 1=1
 AND YEAR(contraventiondatetime) in (2023,2024);
 
--- Create a table storing Intinial Notice
+-- Create a table storing Intinial Notice.
 SELECT
  co.ContraventionID, ZoneExternalReference, ServiceType,  VRN, FirstIssuedDate, ContraventionStatus, ContraventionReason,
  A.ID AccountID,
