@@ -16,10 +16,12 @@ EXEC Reporting.GetContraventionsByFuzzyMatchIds;
 SELECT 
 FORMAT(InDateTime, 'yyyy-MM') AS [YearMonth],
 PCNStatus AS ContraventionStatus,
-COUNT(0) PCNs
+COUNT(*) AS PCNs
 FROM #TempGetContraventionsByFuzzyMatchIds
 GROUP BY FORMAT(InDateTime, 'yyyy-MM'), PCNStatus
-Order by FORMAT(InDateTime, 'yyyy-MM')
+ORDER BY FORMAT(InDateTime, 'yyyy-MM');
+
+DROP TABLE IF EXISTS #TempGetContraventionsByFuzzyMatchIds;
 
 
 
