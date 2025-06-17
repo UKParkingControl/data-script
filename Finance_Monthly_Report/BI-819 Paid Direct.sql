@@ -1,18 +1,3 @@
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
--- =============================================
--- Author:      Hieu Ho / Gary Brown
--- Create Date: 2024-07-16
--- Description: Pulls a list of Stella Paid Direct payments (payments which are made by drivers directly to UKPC, whilst the contravention is at debt recovery.)
---				Data from 01/06/2023 only
--- =============================================
-
---CREATE PROCEDURE [reports].[usp_PaidDirects] AS
-
 	;With cte_PaidContraventions AS -- Get contravention and DR data for PAID contraventions. We look at the most recent record from the DR table when partitioned by contraventionID.
 	(
 		SELECT * FROM 
