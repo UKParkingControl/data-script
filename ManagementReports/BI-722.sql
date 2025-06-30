@@ -1,3 +1,4 @@
+
 SELECT *
 FROM OPENQUERY(StellaProduction, '
 WITH paidAt AS (
