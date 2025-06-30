@@ -11,7 +11,7 @@
       <am:Name>PBIRB</am:Name>
       <am:Version>15.7.1814.616</am:Version>
     </am:UpdatedBy>
-    <am:LastModifiedTimestamp>2025-06-16T07:19:56.5986129Z</am:LastModifiedTimestamp>
+    <am:LastModifiedTimestamp>2025-06-27T07:39:38.4541151Z</am:LastModifiedTimestamp>
   </am:AuthoringMetadata>
   <df:DefaultFontFamily>Segoe UI</df:DefaultFontFamily>
   <AutoRefresh>0</AutoRefresh>
@@ -52,18 +52,23 @@
     
     SELECT  ci.SiteName AS ZoneName,
         cst.Service_Type_Filter AS ServiceType,
+        s.RegionName,
+        s.SubRegionName,
         COUNT(*) AS TotalPCNsThisMonthLastYear, 
         CAST(szas.PPSTermDate AS DATE) PPSTermDate
 	FROM [Statistics].Sites_ZoneActiveServices szas 
 	JOIN  [BusinessIntelligence].[Statistics].Contraventions_Issued ci ON szas.ZoneExternalReference = ci.SiteReference
 	INNER JOIN [BusinessIntelligence].[Statistics].Contraventions_ServiceTypes cst    ON ci.Service_type_prefix = cst.Service_type_prefix AND  cst.Service_Type_Filter LIKE 'PPS%'
-	WHERE DATEFROMPARTS(YEAR( szas.PPSTermDate), MONTH(szas.PPSTermDate), 1) = @ThisMonth 
+	LEFT JOIN BusinessIntelligence.[Statistics].Sites s ON szas.ZoneExternalReference = s.ZoneExternalReference
+	WHERE DATEFROMPARTS(YEAR( szas.PPSTermDate), MONTH(szas.PPSTermDate), 1) &lt; @ThisMonth 
 		AND  DATEFROMPARTS(YEAR(ci.DateIssued), MONTH(ci.DateIssued), 1) = @LastYearSameMonth
 		
 	GROUP BY 
         ci.SiteName,
         cst.Service_Type_Filter,
-        szas.PPSTermDate
+        szas.PPSTermDate,
+        s.RegionName,
+        s.SubRegionName
     ORDER BY COUNT(*) DESC;
 END
  		</CommandText>
@@ -77,9 +82,17 @@ END
           <rd:TypeName>System.String</rd:TypeName>
           <DataField>ServiceType</DataField>
         </Field>
+        <Field Name="RegionName">
+          <rd:TypeName>System.String</rd:TypeName>
+          <DataField>RegionName</DataField>
+        </Field>
         <Field Name="TotalPCNsThisMonthLastYear">
           <rd:TypeName>System.Int32</rd:TypeName>
           <DataField>TotalPCNsThisMonthLastYear</DataField>
+        </Field>
+        <Field Name="SubRegionName">
+          <rd:TypeName>System.String</rd:TypeName>
+          <DataField>SubRegionName</DataField>
         </Field>
         <Field Name="PPSTermDate">
           <rd:TypeName>System.DateTime</rd:TypeName>
@@ -126,16 +139,22 @@ OPTION (MAXRECURSION 1000);
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>1.92361in</Width>
+                  <Width>1.47569in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.92361in</Width>
+                  <Width>1.21875in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.36931in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>1in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.21653in</Width>
+                  <Width>1in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>0.99778in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -174,8 +193,68 @@ OPTION (MAXRECURSION 1000);
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox3">
-                          <rd:DefaultName>Textbox3</rd:DefaultName>
+                        <Textbox Name="Textbox5">
+                          <rd:DefaultName>Textbox5</rd:DefaultName>
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Region</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox9">
+                          <rd:DefaultName>Textbox9</rd:DefaultName>
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Sub Region</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox13">
+                          <rd:DefaultName>Textbox13</rd:DefaultName>
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -234,8 +313,8 @@ OPTION (MAXRECURSION 1000);
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox5">
-                          <rd:DefaultName>Textbox5</rd:DefaultName>
+                        <Textbox Name="Textbox2">
+                          <rd:DefaultName>Textbox2</rd:DefaultName>
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -249,7 +328,6 @@ OPTION (MAXRECURSION 1000);
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <ZIndex>1</ZIndex>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -300,8 +378,68 @@ OPTION (MAXRECURSION 1000);
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="ServiceType">
-                          <rd:DefaultName>ServiceType</rd:DefaultName>
+                        <Textbox Name="RegionName">
+                          <rd:DefaultName>RegionName</rd:DefaultName>
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!RegionName.Value</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="SubRegionName">
+                          <rd:DefaultName>SubRegionName</rd:DefaultName>
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!SubRegionName.Value</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ServiceType1">
+                          <rd:DefaultName>ServiceType1</rd:DefaultName>
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -400,6 +538,8 @@ OPTION (MAXRECURSION 1000);
                 <TablixMember />
                 <TablixMember />
                 <TablixMember />
+                <TablixMember />
+                <TablixMember />
               </TablixMembers>
             </TablixColumnHierarchy>
             <TablixRowHierarchy>
@@ -416,7 +556,7 @@ OPTION (MAXRECURSION 1000);
             <Top>1.00569in</Top>
             <Left>0.11333in</Left>
             <Height>0.86458in</Height>
-            <Width>7.06375in</Width>
+            <Width>7.06153in</Width>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -431,11 +571,11 @@ OPTION (MAXRECURSION 1000);
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>Displays PPS PCNs from the same month last year for locations that were terminated in the selected month.</Value>
+                    <Value>Displays PPS PCNs from the same month last year for locations that were terminated prior to the selected month.</Value>
                     <Style>
                       <FontStyle>Italic</FontStyle>
                       <FontFamily>Segoe UI Light</FontFamily>
-                      <FontSize>8pt</FontSize>
+                      <FontSize>9pt</FontSize>
                       <FontWeight>Normal</FontWeight>
                       <TextDecoration>None</TextDecoration>
                       <Color>#000000</Color>
@@ -483,10 +623,10 @@ OPTION (MAXRECURSION 1000);
           </Border>
         </Style>
       </Body>
-      <Width>8.35416in</Width>
+      <Width>11.40624in</Width>
       <Page>
         <PageFooter>
-          <Height>0.45in</Height>
+          <Height>2.36667in</Height>
           <PrintOnFirstPage>true</PrintOnFirstPage>
           <PrintOnLastPage>true</PrintOnLastPage>
           <ReportItems>
