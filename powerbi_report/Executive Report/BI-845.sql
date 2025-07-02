@@ -10,6 +10,10 @@ GO
 -- Author:		    Gary Brown
 -- ALTERd date:     2024-12-11
 -- Description:		Average issued tickets (per week) data, showing 13 weekly totals
+-- 
+-- Author:          Anh Tran
+-- Alter date:      2025-07-02
+-- Description:     Weekly data from the beginning of the year until now instead of just the last 12 weeks.
 -- =============================================
 
 ALTER PROCEDURE [Statistics].[usp_WeeklyRollingAverage_IssuedTickets]
@@ -21,7 +25,12 @@ AS
     DECLARE @CurrentDate DATE;
 
     SET @LastMonday = DATEADD(DAY, -((DATEPART(WEEKDAY, GETDATE()) + @@DATEFIRST - 2) % 7), GETDATE())
-    SET @ReportStartDate = DATEADD(WEEK, -12, @LastMonday)
+    -- SET @ReportStartDate = DATEADD(WEEK, -12, @LastMonday)
+    SET @ReportStartDate = DATEADD(
+        DAY,
+        -((DATEPART(WEEKDAY, DATEFROMPARTS(YEAR(GETDATE()), 1, 1)) + @@DATEFIRST - 2) % 7),
+        DATEFROMPARTS(YEAR(GETDATE()), 1, 1)
+    );
     SET @CurrentDate = @ReportStartDate
     SET DATEFIRST 1
 
