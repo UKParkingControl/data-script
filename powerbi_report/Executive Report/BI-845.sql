@@ -13,24 +13,22 @@ GO
 -- 
 -- Author:          Anh Tran
 -- Alter date:      2025-07-02
--- Description:     Weekly data from the beginning of the year until now instead of just the last 12 weeks.
+-- Description:     Fetch data based on From and To dates instead of the fixed 12-week range.
 -- =============================================
 
 ALTER PROCEDURE [Statistics].[usp_WeeklyRollingAverage_IssuedTickets]
 AS
 
-    DECLARE @ReportEndDate AS DATE = CAST(GETDATE() AS DATE);
-    DECLARE @ReportStartDate AS DATE;
+    DECLARE @FromDate AS DATE = NULL;
+    DECLARE @ToDate AS DATE = NULL;
     DECLARE @LastMonday DATE;
     DECLARE @CurrentDate DATE;
+    IF @FromDate IS NULL SET @FromDate = CAST(GETDATE() AS DATE);
+    IF @ToDate   IS NULL SET @ToDate   = CAST(GETDATE() AS DATE);
+    DECLARE @ReportStartDate DATE = DATEADD( DAY, -(DATEPART(WEEKDAY, @FromDate) - 1), @FromDate);
+    DECLARE @ReportEndDate DATE = DATEADD( DAY, 7 - DATEPART(WEEKDAY, @ToDate), @ToDate );
 
     SET @LastMonday = DATEADD(DAY, -((DATEPART(WEEKDAY, GETDATE()) + @@DATEFIRST - 2) % 7), GETDATE())
-    -- SET @ReportStartDate = DATEADD(WEEK, -12, @LastMonday)
-    SET @ReportStartDate = DATEADD(
-        DAY,
-        -((DATEPART(WEEKDAY, DATEFROMPARTS(YEAR(GETDATE()), 1, 1)) + @@DATEFIRST - 2) % 7),
-        DATEFROMPARTS(YEAR(GETDATE()), 1, 1)
-    );
     SET @CurrentDate = @ReportStartDate
     SET DATEFIRST 1
 
